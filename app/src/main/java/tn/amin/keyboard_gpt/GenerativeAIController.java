@@ -6,10 +6,13 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import java.util.Map;
+
 import de.robv.android.xposed.XposedBridge;
 import tn.amin.keyboard_gpt.instruction.InstructionCategory;
 import tn.amin.keyboard_gpt.language_model.LanguageModel;
 import tn.amin.keyboard_gpt.language_model.LanguageModelClient;
+import tn.amin.keyboard_gpt.language_model.LanguageModelParameter;
 
 public class GenerativeAIController implements ConfigChangeListener {
     private LanguageModelClient mModelClient = null;
@@ -37,9 +40,7 @@ public class GenerativeAIController implements ConfigChangeListener {
 
     private void setModel(LanguageModel model) {
         mModelClient = LanguageModelClient.forModel(model);
-        mModelClient.setApiKey(mSPManager.getApiKey(model));
-        mModelClient.setSubModel(mSPManager.getSubModel(model));
-        mModelClient.setBaseUrl(mSPManager.getBaseUrl(model));
+        mModelClient.updateParameters(mSPManager.getLanguageModelParameters(model));
     }
 
     @Override
@@ -52,26 +53,10 @@ public class GenerativeAIController implements ConfigChangeListener {
     }
 
     @Override
-    public void onApiKeyChange(LanguageModel languageModel, String apiKey) {
-        mSPManager.setApiKey(languageModel, apiKey);
-        if (mModelClient != null && mModelClient.getLanguageModel() == languageModel) {
-            mModelClient.setApiKey(apiKey);
-        }
-    }
-
-    @Override
-    public void onSubModelChange(LanguageModel languageModel, String subModel) {
-        mSPManager.setSubModel(languageModel, subModel);
-        if (mModelClient != null && mModelClient.getLanguageModel() == languageModel) {
-            mModelClient.setSubModel(subModel);
-        }
-    }
-
-    @Override
-    public void onBaseUrlChange(LanguageModel languageModel, String baseUrl) {
-        mSPManager.setBaseUrl(languageModel, baseUrl);
-        if (mModelClient != null && mModelClient.getLanguageModel() == languageModel) {
-            mModelClient.setBaseUrl(baseUrl);
+    public void onParametersChange(LanguageModel model, Map<LanguageModelParameter, String> parameters) {
+        mSPManager.setLanguageModelParameters(model, parameters);
+        if (mModelClient != null && mModelClient.getLanguageModel() == model) {
+            mModelClient.updateParameters(parameters);
         }
     }
 

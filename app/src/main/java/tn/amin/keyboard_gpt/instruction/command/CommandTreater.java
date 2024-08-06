@@ -2,6 +2,7 @@ package tn.amin.keyboard_gpt.instruction.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import tn.amin.keyboard_gpt.ConfigChangeListener;
 import tn.amin.keyboard_gpt.DialogDismissListener;
@@ -11,6 +12,7 @@ import tn.amin.keyboard_gpt.UiInteracter;
 import tn.amin.keyboard_gpt.instruction.InstructionCategory;
 import tn.amin.keyboard_gpt.instruction.TextTreater;
 import tn.amin.keyboard_gpt.language_model.LanguageModel;
+import tn.amin.keyboard_gpt.language_model.LanguageModelParameter;
 
 public class CommandTreater implements TextTreater, ConfigChangeListener, DialogDismissListener {
     private static final List<AbstractCommand> BUILTIN_COMMANDS = List.of(
@@ -61,17 +63,7 @@ public class CommandTreater implements TextTreater, ConfigChangeListener, Dialog
     }
 
     @Override
-    public void onApiKeyChange(LanguageModel languageModel, String apiKey) {
-
-    }
-
-    @Override
-    public void onSubModelChange(LanguageModel languageModel, String subModel) {
-
-    }
-
-    @Override
-    public void onBaseUrlChange(LanguageModel languageModel, String baseUrl) {
+    public void onParametersChange(LanguageModel model, Map<LanguageModelParameter, String> parameters) {
 
     }
 

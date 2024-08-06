@@ -21,9 +21,12 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.robv.android.xposed.XposedBridge;
 import tn.amin.keyboard_gpt.language_model.LanguageModel;
+import tn.amin.keyboard_gpt.language_model.LanguageModelParameter;
 import tn.amin.keyboard_gpt.ui.DialogType;
 
 public class UiInteracter {
@@ -35,14 +38,7 @@ public class UiInteracter {
 
     public static final String EXTRA_CONFIG_SELECTED_MODEL = "tn.amin.keyboard_gpt.config.SELECTED_MODEL";
 
-    public static final String EXTRA_CONFIG_LANGUAGE_MODEL = "tn.amin.keyboard_gpt.config.model";
-
-    public static final String EXTRA_CONFIG_LANGUAGE_MODEL_BASE_URL = "tn.amin.keyboard_gpt.config.model.BASE_URL";
-
-    public static final String EXTRA_CONFIG_LANGUAGE_MODEL_API_KEY = "tn.amin.keyboard_gpt.config.model.API_KEY";
-
-    public static final String EXTRA_CONFIG_LANGUAGE_MODEL_SUB_MODEL = "tn.amin.keyboard_gpt.config.model.SUB_MODEL";
-
+    public static final String EXTRA_CONFIG_LANGUAGE_MODEL = "tn.amin.keyboard_gpt.config.MODEL";
 
     public static final String EXTRA_WEBVIEW_TITLE = "tn.amin.keyboard_gpt.webview.TITLE";
 
@@ -92,13 +88,12 @@ public class UiInteracter {
                                     LanguageModel configuredlanguageModel = LanguageModel.valueOf(modelName);
                                     Bundle languageModelBundle = bundle.getBundle(modelName);
 
-                                    String apiKey = languageModelBundle.getString(EXTRA_CONFIG_LANGUAGE_MODEL_API_KEY);
-                                    String subModel = languageModelBundle.getString(EXTRA_CONFIG_LANGUAGE_MODEL_SUB_MODEL);
-                                    String baseUrl = languageModelBundle.getString(EXTRA_CONFIG_LANGUAGE_MODEL_BASE_URL);
+                                    Map<LanguageModelParameter, String> parameters = new HashMap<>();
+                                    languageModelBundle.keySet().forEach(k -> {
+                                        parameters.put(LanguageModelParameter.valueOf(k), languageModelBundle.getString(k));
+                                    });
 
-                                    mConfigChangeListeners.forEach((l) -> l.onApiKeyChange(configuredlanguageModel, apiKey));
-                                    mConfigChangeListeners.forEach((l) -> l.onSubModelChange(configuredlanguageModel, subModel));
-                                    mConfigChangeListeners.forEach((l) -> l.onBaseUrlChange(configuredlanguageModel, baseUrl));
+                                    mConfigChangeListeners.forEach((l) -> l.onParametersChange(configuredlanguageModel, parameters));
                                 }
                                 isPrompt = true;
                                 break;

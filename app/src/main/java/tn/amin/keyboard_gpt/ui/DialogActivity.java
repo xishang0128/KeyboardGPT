@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -29,6 +30,7 @@ import tn.amin.keyboard_gpt.instruction.command.Commands;
 import tn.amin.keyboard_gpt.instruction.command.GenerativeAICommand;
 import tn.amin.keyboard_gpt.instruction.command.SimpleGenerativeAICommand;
 import tn.amin.keyboard_gpt.language_model.LanguageModel;
+import tn.amin.keyboard_gpt.language_model.LanguageModelParameter;
 
 public class DialogActivity extends Activity {
     private DialogType mLastDialogType = null;
@@ -196,32 +198,40 @@ public class DialogActivity extends Activity {
             throw new RuntimeException("No model " + mSelectedModel.name());
         }
 
-        String subModel = modelConfig.getString(UiInteracter.EXTRA_CONFIG_LANGUAGE_MODEL_SUB_MODEL);
-        subModel = subModel != null ? subModel : mSelectedModel.defaultSubModel;
-        String apiKey = modelConfig.getString(UiInteracter.EXTRA_CONFIG_LANGUAGE_MODEL_API_KEY);
-        String baseUrl = modelConfig.getString(UiInteracter.EXTRA_CONFIG_LANGUAGE_MODEL_BASE_URL);
-        baseUrl = baseUrl != null ? baseUrl : mSelectedModel.defaultBaseUrl;
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(30, 30, 30, 30);
 
-        LinearLayout layout = (LinearLayout)
-                getLayoutInflater().inflate(R.layout.dialog_configue_model, null);
+        ArrayList<EditText> editTexts = new ArrayList<>();
+        for (LanguageModelParameter parameter: LanguageModelParameter.values()) {
+            String parameterName = parameter.name();
+            String value = modelConfig.getString(parameterName);
+            if (value == null || value.isEmpty()) {
+                value = mSelectedModel.defaultParameters.get(parameter);
+            }
 
-        EditText apiKeyEditText = layout.findViewById(R.id.edit_apikey);
-        EditText subModelEditText = layout.findViewById(R.id.edit_model);
-        EditText baseUrlEditText = layout.findViewById(R.id.edit_baseurl);
-        apiKeyEditText.setText(apiKey);
-        subModelEditText.setText(subModel);
-        baseUrlEditText.setText(baseUrl);
+            LinearLayout layoutParameter = (LinearLayout)
+                    getLayoutInflater().inflate(R.layout.dialog_configue_model, layout, false);
+            EditText editText = layoutParameter.findViewById(R.id.edit);
+            TextView textView = layoutParameter.findViewById(R.id.text);
+
+            textView.setText(parameter.label);
+            editText.setInputType(parameter.inputType);
+            editText.setText(value);
+            editText.setTag(parameter);
+
+            editTexts.add(editText);
+            layout.addView(layoutParameter);
+        }
 
         return new AlertDialog.Builder(this)
                 .setTitle(mSelectedModel.label + " configuration")
                 .setView(layout)
                 .setPositiveButton("Ok", (dialog, which) -> {
-                    modelConfig.putString(UiInteracter.EXTRA_CONFIG_LANGUAGE_MODEL_API_KEY,
-                            apiKeyEditText.getText().toString());
-                    modelConfig.putString(UiInteracter.EXTRA_CONFIG_LANGUAGE_MODEL_SUB_MODEL,
-                            subModelEditText.getText().toString());
-                    modelConfig.putString(UiInteracter.EXTRA_CONFIG_LANGUAGE_MODEL_BASE_URL,
-                            baseUrlEditText.getText().toString());
+                    editTexts.forEach(e -> {
+                        LanguageModelParameter parameter = (LanguageModelParameter) e.getTag();
+                        modelConfig.putString(parameter.name(), e.getText().toString());
+                    });
                     dialog.dismiss();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
