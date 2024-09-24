@@ -142,7 +142,7 @@ public class GenerativeAIController implements ConfigChangeListener {
 
                 mInteracter.post(() -> {
                     mInteracter.setInputType(InputType.TYPE_CLASS_TEXT);
-                    mInteracter.setText("? ");
+                    mInteracter.setText("？ ");
                 });
                 mInteracter.releaseEditTextOwnership(InstructionCategory.Prompt);
                 MainHook.log("Done");

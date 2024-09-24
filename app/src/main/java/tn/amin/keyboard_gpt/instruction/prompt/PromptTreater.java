@@ -22,7 +22,7 @@ public class PromptTreater implements TextTreater, DialogDismissListener {
 
     @Override
     public boolean treat(String instruction) {
-        if (instruction.startsWith("?")) {
+        if (instruction.startsWith("？")) {
             if (mInteracter.showChoseModelDialog()) {
                 mInteracter.toastLong("Chose and configure your language model");
             }
